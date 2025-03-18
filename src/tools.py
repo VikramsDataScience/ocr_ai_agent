@@ -1,24 +1,21 @@
-import os
 import time
 import random
-from dotenv import load_dotenv
 
 from mistralai import Mistral
 from duckduckgo_search import DDGS
 
 # Relative imports
-from . import api_keys_path, ocr_output_path
-
-# Load environment file containing API keys, and grab the Mistral API key
-load_dotenv(api_keys_path)
-mistral_api_key = os.getenv("MISTRAL_API_KEY", "")
+from . import mistral_api_key
 
 # Define the tools
 def search_tool(query: str) -> list[dict]:
     """
-    Parse search query via _query_ arg, run search using 
-    DuckDuckGo and return top 5 results.
-    N.B. PLEASE USE SPARINGLY TO AVOID API LIMITS!"""
+    Helper function to parse search query via _query_ arg, 
+    run search using DuckDuckGo and return top 5 results.
+    N.B. PLEASE USE SPARINGLY TO AVOID API LIMITS!
+    
+    Args:
+        query: The search query to be processed."""
 
     try:
         ddgs = DDGS(headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
@@ -37,8 +34,14 @@ def search_tool(query: str) -> list[dict]:
     return results
 
 
-def ocr_tool(document_url: str) -> str:
-    """Parse document URL via _document_url_ arg, and run OCR using Mistral API."""
+def mistral_ocr_tool(document_url: str) -> str:
+    """ 
+    Helper function to parse document URL via _document_url_ arg, 
+    and run OCR using Mistral API.
+    
+    Args:
+        document_url: The URL of the document to be processed. 
+        Must be a publicly accessible URL pointing to a PDF document."""
     
     client = Mistral(api_key=mistral_api_key)
     
