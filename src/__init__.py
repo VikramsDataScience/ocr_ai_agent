@@ -15,4 +15,5 @@ data_path = Path(file_paths.data_path)
 
 # Load environment file containing API keys, and grab the Mistral API key
 load_dotenv(api_keys_path)
-mistral_api_key = os.getenv("MISTRAL_API_KEY", "")
+mistral_api_key = os.getenv("MISTRAL_API_KEY")
+hf_token = os.getenv("HF_TOKEN")

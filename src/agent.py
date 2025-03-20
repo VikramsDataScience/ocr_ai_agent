@@ -5,6 +5,8 @@ import gradio as gr
 
 # Relative imports
 from .tools import mistral_ocr_tool
+from . import hf_token
+
 
 @tool
 def call_ocr_tool(document_url: str) -> str:
@@ -23,9 +25,10 @@ final_answer_tool = FinalAnswerTool()
 # model = HfApiModel(
 #     model_id="deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B")
 model = HfApiModel(max_tokens=2096,
-    temperature=0.5,
-    model_id='Qwen/Qwen2.5-Coder-32B-Instruct',
-    custom_role_conversions=None,
+                   token=hf_token,
+                   temperature=0.5,
+                   model_id='Qwen/Qwen2.5-Coder-32B-Instruct',
+                   custom_role_conversions=None,
 )
 
 agent = CodeAgent(

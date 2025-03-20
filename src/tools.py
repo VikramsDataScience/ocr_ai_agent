@@ -7,6 +7,7 @@ from duckduckgo_search import DDGS
 # Relative imports
 from . import mistral_api_key
 
+
 # Define the tools
 def search_tool(query: str) -> list[dict]:
     """
@@ -43,11 +44,14 @@ def mistral_ocr_tool(document_url: str) -> str:
         document_url: The URL of the document to be processed. 
         Must be a publicly accessible URL pointing to a PDF document."""
     
+    if not mistral_api_key:
+        raise ValueError("Mistral API key not found. Please provide a valid Mistral API key.")
+    
     client = Mistral(api_key=mistral_api_key)
     
     pdf_response = client.ocr.process(
-    model="mistral-ocr-latest",
-    document={
+        model="mistral-ocr-latest",
+        document={
         "type": "document_url",
         "document_url": document_url,
     },
@@ -56,6 +60,5 @@ def mistral_ocr_tool(document_url: str) -> str:
     
     # Perform markdown on the extracted text
     extracted_text = "\n\n".join(page.markdown for page in pdf_response.pages)
-    print(extracted_text)
 
     return extracted_text
