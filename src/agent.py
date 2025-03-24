@@ -1,8 +1,6 @@
 from smolagents import CodeAgent, HfApiModel, tool
 from smolagents.default_tools import FinalAnswerTool
 
-import gradio as gr
-
 # Relative imports
 from .tools import mistral_ocr_tool
 from . import hf_token
@@ -22,8 +20,12 @@ def call_ocr_tool(document_url: str) -> str:
 
 # Define the agent
 final_answer_tool = FinalAnswerTool()
-# model = HfApiModel(
-#     model_id="deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B")
+# model = HfApiModel(max_tokens=2096,
+#                    token=hf_token,
+#                    temperature=0.5,
+#                 model_id="deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
+#                    custom_role_conversions=None,)
+
 model = HfApiModel(max_tokens=2096,
                    token=hf_token,
                    temperature=0.5,
@@ -42,4 +44,5 @@ agent = CodeAgent(
     name=None,
     description=None,
 )
+# agent.run("Please list 3 key insights you are able to glean from the text in the document at this URL: https://arxiv.org/pdf/2501.12948")
 agent.run("Perform a summary of the document at this URL: https://arxiv.org/pdf/2501.12948")
