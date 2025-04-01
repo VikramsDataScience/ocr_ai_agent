@@ -1,14 +1,15 @@
 from typing import Dict
 
-from smolagents import CodeAgent, HfApiModel, tool
+from smolagents import CodeAgent, tool
 from smolagents.default_tools import FinalAnswerTool
 
 # Relative imports
 from .tools import mistral_ocr_tool, duckduckgo_search_tool
-from . import hf_token
+from . import llama_1B
+from .hf_functions import localTransformersModel
 
 
-# Call the necessary tools
+# Call the available tools
 @tool
 def call_ocr_tool(document_url: str) -> str:
     """A tool that performs OCR on a document using Mistral's API.
@@ -35,12 +36,7 @@ def call_ddgs_search_tool(query: str) -> Dict[str, list[dict[str, any]]]:
 # Define and run the agent
 final_answer_tool = FinalAnswerTool()
 
-model = HfApiModel(max_tokens=2096,
-                   token=hf_token,
-                   temperature=0.5,
-                   model_id='Qwen/Qwen2.5-Coder-32B-Instruct',
-                   custom_role_conversions=None,
-)
+model = localTransformersModel(llama_1B)
 
 agent = CodeAgent(
     model=model,
@@ -54,5 +50,5 @@ agent = CodeAgent(
     name=None,
     description=None,
 )
-# agent.run("Please list 3 key insights you are able to glean from the text in the document at this URL: https://arxiv.org/pdf/2501.12948")
-agent.run("Perform a summary of the document at this URL: https://arxiv.org/pdf/2501.12948")
+agent.run("Please list 3 key insights you are able to glean by conducting a search on the Deepseek R1 technical paper. Additionally, see if you can find the technical paper itself on arxiv. If so, please list the URL of the paper.")
+# agent.run("Perform a summary of the document at this URL: https://arxiv.org/pdf/2501.12948")

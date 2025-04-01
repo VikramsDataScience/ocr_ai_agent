@@ -47,7 +47,7 @@ def duckduckgo_search_tool(query: str, max_results: int = 3, full_page: bool = T
             title = r.get("title")
             search_content = r.get("body")
             
-            # If full_page is True, fetch full page content using the feth_full_page() helper function
+            # If full_page is True, fetch full page content using the fetch_full_page() helper function
             if full_page:
                 full_page_content = fetch_full_page(url)
 
