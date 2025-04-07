@@ -3,9 +3,11 @@ import random
 import httpx
 from markdownify import markdownify
 from typing import Optional, Dict
+from pathlib import Path
 
 from mistralai import Mistral
 from duckduckgo_search import DDGS
+import pandas as pd
 
 # Relative imports
 from . import mistral_api_key
@@ -97,3 +99,28 @@ def mistral_ocr_tool(document_url: str) -> str:
     extracted_text = "\n\n".join(page.markdown for page in pdf_response.pages)
 
     return extracted_text
+
+
+def read_csv_xlsx(file_path: Path, sheet_name = Optional[str]) -> pd.DataFrame:
+    """
+    Helper function to read CSV or XLSX files from a user provided file path 
+    and returns a Pandas DataFrame.
+    
+    Args:
+        file_path: The path to the CSV or XLSX file.
+        sheet_name: If the _file_path_ suffix is an XLSX, the 
+        name of the sheet to read from the XLSX file.
+    """
+    
+    try:
+        if '.xlsx' in file_path.suffix:
+            df = pd.read_excel(file_path, sheet_name)
+        elif '.csv' in file_path.suffix:
+            df = pd.read_csv(file_path)
+        else:
+            raise ValueError("Unsupported file format or incorrect file path. Please provide a valid path that points to a CSV or XLSX file.")
+    except Exception as e:
+        print(f"Error reading file: {e}")
+        return None
+    
+    return df

@@ -14,16 +14,15 @@ def HFApiCall(hf_token, model_id, max_tokens=2096, temperature=0.5):
     
     print("\'hf_token\' specified. Calling Hugging Face API model...")
 
-    model = HfApiModel(max_tokens=max_tokens,
+    return HfApiModel(max_tokens=max_tokens,
                     token=hf_token,
                     temperature=temperature,
                     model_id=model_id,
                     custom_role_conversions=None,
     )
-    return model
 
 
-def localTransformersModel(model_id, temperature=0.5, device_map="auto"):
+def localTransformersModel(model_id, temperature=0.6, device_map="auto", torch_dtype="auto"):
     """
     Use Huggging Face's local Transformers model. Please note that since this uses a 
     local model, please limit your model to only using 1B-3B models, as larger models 
@@ -32,12 +31,13 @@ def localTransformersModel(model_id, temperature=0.5, device_map="auto"):
     Args:
         model_id: The HF model ID to use/download.
         temperature: The temperature value to use for sampling.
-        device_map: The device_map to initialize your model."""
-    
-    print("\'hf_token\' not used. Using local Transformers model...")
+        device_map: The device_map to initialize your model. Use with larger models.
+        However, using larger models on low-end GPUs will mean I/O bottlenecks."""
+        
+    print(f"\'hf_token\' not used. Using local Transformers model: {model_id}...")
 
-    model = TransformersModel(temperature=temperature,
+    return TransformersModel(temperature=temperature,
                             model_id=model_id,
                             device_map=device_map,
+                            torch_dtype=torch_dtype,
                             custom_role_conversions=None)
-    return model
