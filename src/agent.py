@@ -1,14 +1,14 @@
 from typing import Dict, Optional
 from pathlib import Path
 
-from smolagents import CodeAgent, tool, PromptTemplates
+from smolagents import CodeAgent, tool
 from smolagents.default_tools import FinalAnswerTool
 import pandas as pd
 
 # Relative imports
 from .tools import mistral_ocr_tool, duckduckgo_search_tool, read_csv_xlsx
-from . import qwen_7BQuant
-from .hf_functions import localTransformersModel
+from . import qwen_1halfB
+from .hf_functions import localQuantizedLlamaModel, localTransformersModel
 
 
 # Call the available tools
@@ -50,22 +50,21 @@ def call_read_csv_xlsx_tool(file_path: Path, sheet_name: Optional[str] = None) -
 
 # Define and run the agent
 final_answer_tool = FinalAnswerTool()
-model = localTransformersModel(qwen_7BQuant)
+model = localTransformersModel(model_id=qwen_1halfB)
 
 prompt = "Please list 3 key insights you are able to glean by conducting a search on the Deepseek R1 technical paper. Additionally, see if you can find the technical paper itself on arxiv. If so, please list the URL of the paper."
 
 agent = CodeAgent(
     model=model,
-    # prompt_templates=messages,
     tools=[final_answer_tool,
            call_ocr_tool,
-           call_ddgs_search_tool],
+           call_ddgs_search_tool,
+           call_read_csv_xlsx_tool],
         max_steps=6,
     verbosity_level=1,
     grammar=None,
     planning_interval=None,
-    name="Research Assistant",
+    name="AI Research Assistant",
     description="An AI Agent that can search the web, perform OCR on documents, read CSV/XLSX files, and answer questions based on the information it finds.",
 )
-agent.run(prompt)
-# agent.run("Perform a summary of the document at this URL: https://arxiv.org/pdf/2501.12948")
+agent.run(prompt, reset=True) # Change 'reset' arg to False when ready to ask the agent follow up questions
