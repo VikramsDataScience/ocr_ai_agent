@@ -1,14 +1,15 @@
 from typing import Dict, Optional
 from pathlib import Path
 
-from smolagents import CodeAgent, tool
+from smolagents import CodeAgent, tool, PromptTemplates, FinalAnswerPromptTemplate
 from smolagents.default_tools import FinalAnswerTool
 import pandas as pd
 
 # Relative imports
 from .tools import mistral_ocr_tool, duckduckgo_search_tool, read_csv_xlsx
-from . import qwen_1halfB
-from .hf_functions import localQuantizedLlamaModel, localTransformersModel
+from . import llama_1B
+from .hf_functions import localQuantizedLlamaModel
+from .llama_tool_definitions import system_prompt
 
 
 # Call the available tools
@@ -50,7 +51,7 @@ def call_read_csv_xlsx_tool(file_path: Path, sheet_name: Optional[str] = None) -
 
 # Define and run the agent
 final_answer_tool = FinalAnswerTool()
-model = localTransformersModel(model_id=qwen_1halfB)
+model = localQuantizedLlamaModel(model_id=llama_1B)
 
 prompt = "Please list 3 key insights you are able to glean by conducting a search on the Deepseek R1 technical paper. Additionally, see if you can find the technical paper itself on arxiv. If so, please list the URL of the paper."
 
@@ -60,6 +61,9 @@ agent = CodeAgent(
            call_ocr_tool,
            call_ddgs_search_tool,
            call_read_csv_xlsx_tool],
+    prompt_templates=PromptTemplates(system_prompt=system_prompt,
+                                     final_answer=FinalAnswerPromptTemplate(pre_messages="",
+                                                                            post_messages="")),
         max_steps=6,
     verbosity_level=1,
     grammar=None,
