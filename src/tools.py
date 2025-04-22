@@ -33,7 +33,7 @@ def duckduckgo_search_tool(query: str, max_results: int = 3, full_page: bool = T
     N.B. PLEASE USE SPARINGLY TO AVOID API LIMITS!
     
     Args:
-        query: The search query to be processed.
+        query: The search query to be parsed to the DuckDuckGo search engine.
         max_results: The maximum number of search results to return.
         full_page: Whether to return full page content or not. If True, it will use 
         the fetch_full_page() helper function."""

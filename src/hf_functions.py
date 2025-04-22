@@ -76,11 +76,11 @@ def localQuantizedLlamaModel(model_id, temperature=0.5, max_new_tokens=2096):
             )
             
         def _load_model(self):
-            # Override the model loading method to apply quantization
+            # Apply quantization
             self.model = AutoModelForCausalLM.from_pretrained(
                 self.model_id,
                 device_map="auto",
-                torch_dtype=torch.bfloat16,
+                torch_dtype=torch.bfloat16, # 4bit quantization. Use torch.float32 for 8bit quantization
                 quantization_config=quantization_config
             )
             self.tokenizer = AutoTokenizer.from_pretrained(self.model_id)
