@@ -9,7 +9,7 @@ import pandas as pd
 from .tools import mistral_ocr_tool, duckduckgo_search_tool, read_csv_xlsx
 from . import llama_1B
 from .hf_functions import localQuantizedLlamaModel
-from .llama_tool_definitions import system_prompt
+from .llama_tool_definitions import system_prompt, prompt
 
 
 # Call the available tools
@@ -53,17 +53,15 @@ def call_read_csv_xlsx_tool(file_path: Path, sheet_name: Optional[str] = None) -
 final_answer_tool = FinalAnswerTool()
 model = localQuantizedLlamaModel(model_id=llama_1B)
 
-prompt = "Please list 3 key insights you are able to glean by conducting a search on the Deepseek R1 technical paper. Additionally, see if you can find the technical paper itself on arxiv. If so, please list the URL of the paper."
-
 agent = CodeAgent(
     model=model,
-    tools=[final_answer_tool,
-           call_ocr_tool,
-           call_ddgs_search_tool,
-           call_read_csv_xlsx_tool],
+    tools=[final_answer_tool],
     prompt_templates=PromptTemplates(system_prompt=system_prompt,
                                      final_answer=FinalAnswerPromptTemplate(pre_messages="",
                                                                             post_messages="")),
+    additional_authorized_imports=[call_ocr_tool,
+           call_ddgs_search_tool,
+           call_read_csv_xlsx_tool],
         max_steps=6,
     verbosity_level=1,
     grammar=None,
