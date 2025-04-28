@@ -2,25 +2,91 @@
 ALSO, WHEN NEW TOOLS ARE BUILT IN TOOLS.PY, PLEASE UPDATE THESE TEMPLATES TO REFLECT THE NEW TOOLS.
 """
 
-llama_system_prompt = """You are an AI assistant that helps users by executing tools as function calls when needed. When you need to make a function call, you must follow this EXACT response format:
+from .tools import duckduckgo_search_tool, google_search_serpapi, mistral_ocr_tool, read_csv_xlsx
 
-Thoughts: [briefly explain your reasoning]
+function_definitions = """[
+        {
+        "name": "google_search_serpapi",
+        "description": "Helper function to run Google searches via SerpAPI.",
+        "parameters": {
+            "type": "dict",
+            "required": ["query"],
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "The search query to be parsed to the Google search engine."
+                },
+                "max_results": {
+                    "type": "integer",
+                    "description": "The maximum number of search results to return."
+                },
+                "full_page": {
+                    "type": "boolean",
+                    "description": "Whether to return full page content or not."
+                }
+            }
+        }
+    },
+    {
+        "name": "duckduckgo_search_tool",
+        "description": "Helper function to parse search query via _query_ arg, run search using DuckDuckGo and return top results.",
+        "parameters": {
+            "type": "dict",
+            "required": ["query"],
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "The search query to be parsed to the DuckDuckGo search engine."
+                },
+                "max_results": {
+                    "type": "integer",
+                    "description": "The maximum number of search results to return."
+                },
+                "full_page": {
+                    "type": "boolean",
+                    "description": "Whether to return full page content or not."
+                }
+            }
+        }
+    },
+    {
+        "name": "mistral_ocr_tool",
+        "description": "Helper function to parse document URL and run OCR using Mistral API.",
+        "parameters": {
+            "type": "dict",
+            "required": ["document_url"],
+            "properties": {
+                "document_url": {
+                    "type": "string",
+                    "description": "The URL of the document to be processed. Must be a publicly accessible URL pointing to a PDF document."
+                }
+            }
+        }
+    },
+]"""
+
+llama_system_prompt = """You are an AI research assistant with access to specific tools to help answer questions.
+
+IMPORTANT: You CANNOT import external libraries like 'requests' or anything else. Attempts to do so will fail.
+
+Instead, use ONLY these available tools:
+- call_ocr_tool(document_url="The URL of the document to be processed")
+- call_google_search_tool(query="The search query to be parsed to the Google search engine")
+- call_ddgs_search_tool(query="The search query to be run") 
+
+When you need to use a tool, your response must follow EXACTLY this format:
+
+Thoughts: [brief explanation of your reasoning]
 Code:
 ```py
-# Your function call here, for example:
-duckduckgo_search_tool(query="search query", max_results=3, full_page=True)
+# Call the appropriate tool
+call_ddgs_search_tool(query="specific search terms")
 ```<end_code>
 
-The code block MUST start with ```py on its own line, contain your Python code, and end with ```<end_code> on its own line.
-
-Available tools:
-- duckduckgo_search_tool(query: str, max_results: int, full_page: bool): Tool call to parse search query via _query_ arg, 
-run search using DuckDuckGo and return top 3 results.
-- mistral_ocr_tool(document_url: str): Tool call to parse document URL via _document_url_ arg, and run OCR using Mistral API.
-- read_csv_xlsx(file_path: Path, sheet_name: Optional[str]): Tool call to read CSV or XLSX files from a user provided file path 
-and returns a Pandas DataFrame.
-
-DO NOT include function definitions or explanations in your code block. ONLY include the actual function calls.
-"""
+DO NOT attempt additional imports of any sort that are not listed above.
+DO NOT try to define your own functions.
+ONLY use the pre-defined tools listed above. Here's the above list of functions in JSON format that you can invoke:
+{functions}
+""".format(functions=function_definitions)
 
 prompt = "Please list 3 key insights you are able to glean by conducting a search on the Deepseek R1 technical paper. Additionally, see if you can find the technical paper itself on arxiv. If so, please list the URL of the paper."
