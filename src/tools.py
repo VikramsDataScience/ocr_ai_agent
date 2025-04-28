@@ -7,10 +7,11 @@ from pathlib import Path
 
 from mistralai import Mistral
 from duckduckgo_search import DDGS
+from serpapi import search
 import pandas as pd
 
 # Relative imports
-from . import mistral_api_key
+from . import mistral_api_key, serpapi_api_key
 
 def fetch_full_page(url: str) -> Optional[str]:
     """Helper function to fetch full page content from a URL."""
@@ -70,6 +71,24 @@ def duckduckgo_search_tool(query: str, max_results: int = 3, full_page: bool = T
         print(f"Full error stack trace: {type(e).__name__}")
 
     return results
+
+def google_search_serpapi(query: str) -> Dict[str, dict[str, any]]:
+    """
+    Helper function to run Google searches via SerpAPI.
+    
+    Args:
+        query: The search query to be parsed to the Google search engine."""
+
+    params_dict = {"q": query, 
+                   "location": "Melbourne, Australia",
+                    "hl": "en",
+                    "gl": "au",
+                    "google_domain": "google.com.au",
+                    "api_key": serpapi_api_key}
+
+    search_results = search(**params_dict)
+    
+    return search_results
 
 
 def mistral_ocr_tool(document_url: str) -> str:

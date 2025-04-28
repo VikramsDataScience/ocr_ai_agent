@@ -22,6 +22,7 @@ data_path = Path(file_paths.data_path)
 load_dotenv(api_keys_path)
 mistral_api_key = os.getenv("MISTRAL_API_KEY")
 hf_token = os.getenv("HF_TOKEN")
+serpapi_api_key = os.getenv("SERP_API_KEY")
 langfuse_public_key = os.getenv("LANGFUSE_PUBLIC_KEY")
 langfuse_secret_key = os.getenv("LANGFUSE_SECRET_KEY")
 langfuse_host = os.getenv("LANGFUSE_HOST")
@@ -33,4 +34,5 @@ qwen_32B = "Qwen/Qwen2.5-Coder-32B-Instruct"
 
 # LLMs for local use
 qwen_1half5BQuant = "Qwen/Qwen2.5-Coder-1.5B-Instruct-AWQ"
+qwen_1half5B8bitQuant = "Qwen/Qwen2.5-Coder-1.5B-Instruct-GPTQ-Int8"
 llama_1B = "meta-llama/Llama-3.2-1B-Instruct"

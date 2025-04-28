@@ -1,15 +1,15 @@
 from typing import Dict, Optional
 from pathlib import Path
 
-from smolagents import CodeAgent, tool, PromptTemplates, FinalAnswerPromptTemplate
+from smolagents import CodeAgent, tool, ToolCallingAgent, PromptTemplates, FinalAnswerPromptTemplate
 from smolagents.default_tools import FinalAnswerTool
 import pandas as pd
 
 # Relative imports
-from .tools import mistral_ocr_tool, duckduckgo_search_tool, read_csv_xlsx
-from . import llama_1B
-from .hf_functions import localQuantizedLlamaModel
-from .llama_tool_definitions import system_prompt, prompt
+from .tools import mistral_ocr_tool, duckduckgo_search_tool, google_search_serpapi, read_csv_xlsx
+from . import llama_1B, qwen_1half5B8bitQuant
+from .hf_functions import localTransformersModel, localQuantizedLlamaModel
+from .llm_chat_templates import llama_system_prompt, prompt
 
 
 # Call the available tools
@@ -23,6 +23,17 @@ def call_ocr_tool(document_url: str) -> str:
         and the user must provide this URL to the agent."""
 
     return mistral_ocr_tool(document_url)
+
+@tool
+def call_google_search_tool(query: str) -> Dict[str, dict[str, any]]:
+    """A tool that performs a Google search using SerpAPI. Use this tool if you require
+    additional information from the web that is not provided by the user. Please
+    use this tool sparingly to avoid API limits.
+    
+    Args:
+        query: The search query to be run."""
+
+    return google_search_serpapi(query)
 
 @tool
 def call_ddgs_search_tool(query: str) -> Dict[str, list[dict[str, any]]]:
@@ -53,20 +64,27 @@ def call_read_csv_xlsx_tool(file_path: Path, sheet_name: Optional[str] = None) -
 final_answer_tool = FinalAnswerTool()
 model = localQuantizedLlamaModel(model_id=llama_1B)
 
-agent = CodeAgent(
+# agent = CodeAgent(
+#     model=model,
+#     tools=[final_answer_tool,
+#            call_ocr_tool,
+#            call_ddgs_search_tool,
+#            call_google_search_tool,
+#            call_read_csv_xlsx_tool],
+#         max_steps=6,
+#     verbosity_level=1,
+#     grammar=None,
+#     planning_interval=None,
+#     name="AI Research Assistant",
+#     description="An AI Agent that can search the web, perform OCR on documents, read CSV/XLSX files, and answer questions based on the information it finds.",
+# )
+agent = ToolCallingAgent(
     model=model,
-    tools=[final_answer_tool],
-    prompt_templates=PromptTemplates(system_prompt=system_prompt,
-                                     final_answer=FinalAnswerPromptTemplate(pre_messages="",
-                                                                            post_messages="")),
-    additional_authorized_imports=[call_ocr_tool,
+    tools=[call_ocr_tool,
            call_ddgs_search_tool,
-           call_read_csv_xlsx_tool],
-        max_steps=6,
-    verbosity_level=1,
-    grammar=None,
-    planning_interval=None,
-    name="AI Research Assistant",
-    description="An AI Agent that can search the web, perform OCR on documents, read CSV/XLSX files, and answer questions based on the information it finds.",
+           call_google_search_tool],
+    prompt_templates=PromptTemplates(system_prompt=llama_system_prompt,
+                                     final_answer=FinalAnswerPromptTemplate(pre_messages="",
+                                                                            post_messages=""))
 )
 agent.run(prompt, reset=True) # Change 'reset' arg to False when ready to ask the agent follow up questions

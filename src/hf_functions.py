@@ -3,7 +3,7 @@ from transformers import AutoModelForCausalLM, BitsAndBytesConfig, AutoTokenizer
 import torch
 
 
-def HFApiCall(hf_token, model_id, max_tokens=2096, temperature=0.5):
+def HFApiCall(hf_token, model_id, max_tokens=1024, temperature=0.5):
     """
     Use Hugging Face API model. Please note that the 'hf_token' is required 
     to use this model, and that we're using the free tier of the API.
@@ -24,7 +24,7 @@ def HFApiCall(hf_token, model_id, max_tokens=2096, temperature=0.5):
     )
 
 
-def localTransformersModel(model_id, tokenizer=None, temperature=0.6, device_map="auto", torch_dtype="auto"):
+def localTransformersModel(model_id, tokenizer=None, temperature=0.5):
     """
     Use Huggging Face's local Transformers model. Please note that since this uses a 
     local model, please limit your model to only using 1B-3B models, as larger models 
@@ -42,12 +42,12 @@ def localTransformersModel(model_id, tokenizer=None, temperature=0.6, device_map
                              tokenizer=tokenizer,
                              device="cuda",
                             model_id=model_id,
-                            device_map=device_map,
-                            torch_dtype=torch_dtype,
+                            device_map="auto",
+                            torch_dtype="auto",
                             custom_role_conversions=None)
 
 
-def localQuantizedLlamaModel(model_id, temperature=0.5, max_new_tokens=2096):
+def localQuantizedLlamaModel(model_id, temperature=0.6, top_p=0.9, max_new_tokens=1024):
     """Use this Quanitization function with LLAMA models ONLY. This function
     won't work with other models, since the quantization configurations are 
     individual to each LLM. Please refer to the model cards on Hugging Face 
@@ -68,9 +68,10 @@ def localQuantizedLlamaModel(model_id, temperature=0.5, max_new_tokens=2096):
     
     # Create a custom TransformersModel that applies quantization when loading
     class QuantizedTransformersModel(TransformersModel):
-        def __init__(self, model_id, temperature, max_new_tokens):
+        def __init__(self, model_id, temperature, top_p, max_new_tokens):
             super().__init__(
                 temperature=temperature,
+                top_p=top_p,
                 max_new_tokens=max_new_tokens,
                 model_id=model_id
             )
@@ -88,5 +89,6 @@ def localQuantizedLlamaModel(model_id, temperature=0.5, max_new_tokens=2096):
     return QuantizedTransformersModel(
         model_id=model_id,
         temperature=temperature,
+        top_p=top_p,
         max_new_tokens=max_new_tokens
     )
